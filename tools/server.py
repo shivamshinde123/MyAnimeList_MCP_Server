@@ -15,8 +15,9 @@ app.mount("/mal_mcp", mcp.streamable_http_app())
 
 
 def main():
+    """Run the MCP server with streamable HTTP transport."""
     mcp.run(transport="streamable-http")
 
 if __name__ == "__main__":
-
+    """Entry point for running the MCP server."""
     main()

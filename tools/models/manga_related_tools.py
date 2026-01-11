@@ -15,8 +15,19 @@ from models.manga_models import (
 
 @mcp.tool()
 async def get_top_manga(params: TopMangaParams):
-
-    """Use this tool to get the top manga"""
+    """Get the top-ranked manga from MyAnimeList.
+    
+    Args:
+        params (TopMangaParams): Parameters for filtering top manga including
+                               filter, ratings, limit
+    
+    Returns:
+        List[TopMangaResponse]: List of top manga with title, type, volumes,
+                              status, rank, synopsis, season, and year.
+    
+    Raises:
+        Exception: If there's an error fetching data from the API.
+    """
 
     try:
         async with httpx.AsyncClient() as client:
@@ -50,8 +61,15 @@ async def get_top_manga(params: TopMangaParams):
 
 @mcp.tool()
 async def get_random_manga():
-
-    """Use this tool to get a random manga"""
+    """Get a random manga from MyAnimeList.
+    
+    Returns:
+        RandomMangaResponse: A random manga with title, type, volumes,
+                           status, rank, synopsis, season, and year.
+    
+    Raises:
+        Exception: If there's an error fetching data from the API.
+    """
     
     try:
         async with httpx.AsyncClient() as client:
@@ -81,9 +99,18 @@ async def get_random_manga():
 
 @mcp.tool()
 async def get_manga_reviews(id: int, params: MangaReviewParams):
+    """Get reviews for a specific manga by its MyAnimeList ID.
     
-    """
-    Use this tool to get the anime reviews
+    Args:
+        id (int): The MyAnimeList ID of the manga.
+        params (MangaReviewParams): Parameters for filtering reviews including
+                                  spoilers and preliminary options.
+    
+    Returns:
+        List[MangaReviewResponse]: List of manga reviews with review text and date.
+    
+    Raises:
+        Exception: If there's an error fetching reviews from the API.
     """
 
     try:
