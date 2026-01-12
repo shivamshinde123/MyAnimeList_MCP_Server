@@ -15,6 +15,28 @@ async def search_manga(params: MangaSearchParams):
     This tool searches for manga using the provided query and applies optional filters
     like status, ordering, and date ranges. The query parameter is required.
     
+    CRITICAL INSTRUCTIONS FOR LLM:
+    - This API is UNRELIABLE and often returns incorrect or irrelevant results
+    - DO NOT use this tool to find MAL IDs for other tools (get_similar_manga, get_manga_reviews, get_manga_news)
+    - For finding MAL IDs: ALWAYS use web_search("{manga_name} MyAnimeList ID") instead
+    
+    When to Use This Tool:
+      Searching for manga by keywords/themes (e.g., "fantasy manga", "horror manga")
+      Exploring manga by genre, author, or other filters
+      Finding manga you don't know the exact name of
+    
+    When not to Use This Tool
+      Getting MAL IDs for other tools (use web_search instead)
+      Finding specific well-known manga (use web_search instead)
+    
+    Example:
+      User asks: "Find manga about samurai"
+      CORRECT: search_manga(params={"query": "samurai"})
+      
+      User asks: "Find manga similar to Berserk"
+      WRONG: search_manga("Berserk") then get_similar_manga(result)
+      CORRECT: web_search("Berserk MyAnimeList ID") → get_similar_manga(id)
+    
     Args:
         params (MangaSearchParams): Search parameters including:
             - query (str): REQUIRED - The search term (manga title or keywords)
@@ -28,9 +50,9 @@ async def search_manga(params: MangaSearchParams):
     Returns:
         List[MangaSearchResponse]: List of manga matching search criteria with
                                  detailed information including MAL ID, title,
-                                 volumes, status, currently publishing or not, start_date, end_date
-                                 ,score, scored_by, rank, popularity, favorites, synopsis, background,
-                                 , author_ids list, author_names list, genre_ids list, genre_names list
+                                 volumes, status, currently publishing or not, start_date, end_date,
+                                 score, scored_by, rank, popularity, favorites, synopsis, background,
+                                 author_ids list, author_names list, genre_ids list, genre_names list
     
     Raises:
         Exception: If there's an error fetching search results from the API.
@@ -117,11 +139,31 @@ async def get_top_manga(params: TopMangaParams):
     This tool retrieves the highest-rated manga from MyAnimeList's rankings.
     You can filter by different categories and content ratings.
     
+    TOOL SELECTION PRIORITY:
+    - Use THIS tool for ranking/popularity queries (e.g., "top manga", "most popular", "best rated")
+    - DO NOT use search_manga for ranking queries
+    - This is a specialized tool optimized for curated ranking data
+    
+    When to Use This Tool:
+      "What are the top manga?"
+      "Show me the most popular manga"
+      "Best manga of all time"
+      "What's currently publishing and popular?"
+      "Most favorited manga"
+      "Top upcoming manga"
+      DO NOT use search_manga with keywords like "popular" or "top"
+    
     Args:
         params (TopMangaParams): Filtering parameters including:
             - filter (str): Ranking category - 'airing' (currently publishing), 'upcoming' (not yet published), 'bypopularity' (most popular), 'favorite' (most favorited)
             - ratings (str): Content rating filter - 'g' (General), 'pg' (Parental Guidance), 'pg13' (13+), 'r17' (17+), 'r' (Restricted), 'rx' (Hentai)
             - limit (int): Number of results to return (default: 10, max: 500)
+    
+    Filter Examples:
+      "Top currently publishing manga" → filter='airing'
+      "Most popular manga" → filter='bypopularity'
+      "Most favorited manga" → filter='favorite'
+      "Best upcoming manga" → filter='upcoming'
     
     Returns:
         List[TopMangaResponse]: List of top manga with title, type, volumes,
@@ -189,6 +231,19 @@ async def get_random_manga():
     This tool fetches a single random manga from MyAnimeList's database.
     No parameters are needed - it returns a surprise manga recommendation.
     
+    TOOL SELECTION PRIORITY:
+    - Use THIS tool when users want random/surprise manga recommendations
+    - DO NOT use search_manga for random recommendations
+    - This is a specialized tool that provides truly random selections
+    
+    When to Use This Tool:
+      "Give me a random manga"
+      "Surprise me with a manga"
+      "Pick something random for me to read"
+      "I don't know what manga to read, choose for me"
+    
+    DO NOT use search_manga or get_top_manga instead
+    
     Returns:
         RandomMangaResponse: A random manga with title, type, volumes,
                            status, rank, synopsis, season, and year.
@@ -248,11 +303,24 @@ async def get_random_manga():
 async def get_manga_reviews(id: int, params: MangaReviewParams):
     """Get user reviews for a specific manga by its MyAnimeList ID.
     
-    This tool fetches user-written reviews for a specific manga. You need the
-    manga's MAL ID (which you can get from search_manga or other tools).
+    This tool fetches user-written reviews for a specific manga.
+    
+    CRITICAL INSTRUCTIONS FOR LLM:
+    - This tool REQUIRES a numeric MAL ID
+    - NEVER use search_manga to get MAL IDs (it returns incorrect results)
+    - If you don't have the MAL ID, you MUST follow this workflow:
+      1. Use web_search with query: "{manga_name} MyAnimeList ID"
+      2. Extract the numeric ID from the search results
+      3. Then call this function with that ID
+    
+    Example Workflow:
+      User asks: "What do people think about Berserk?"
+      WRONG: search_manga("Berserk") then get_manga_reviews(result)
+      CORRECT: web_search("Berserk MyAnimeList ID") → Extract ID: 2 → get_manga_reviews(2, params)
     
     Args:
-        id (int): REQUIRED - The MyAnimeList ID of the manga (e.g., 2 for Berserk)
+        id (int): REQUIRED - The MyAnimeList ID of the manga
+                 Example IDs: Berserk=2, One Piece=13, Naruto=11, Monster=1
         params (MangaReviewParams): Review filtering parameters including:
             - preliminary (bool): Include preliminary reviews (default: True) - Set to True if manga is still publishing
             - spoilers (bool): Include reviews with spoilers (default: False) - Set to True to include spoiler reviews
@@ -315,9 +383,23 @@ async def get_similar_manga(id: int):
     This tool finds manga that are similar to the one you specify. Perfect for
     discovering new manga based on something you already know or like.
     
+    CRITICAL INSTRUCTIONS FOR LLM:
+    - This tool REQUIRES a numeric MAL ID
+    - NEVER use search_manga to get MAL IDs (it returns incorrect results)
+    - If you don't have the MAL ID, you MUST follow this workflow:
+      1. Use web_search with query: "{manga_name} MyAnimeList ID"
+      2. Extract the numeric ID from the search results
+      3. Then call this function with that ID
+    
+    Example Workflow:
+      User asks: "Find manga similar to Berserk"
+      WRONG: search_manga("Berserk") then get_similar_manga(result)
+      CORRECT: web_search("Berserk MyAnimeList ID") → Extract ID: 2 → get_similar_manga(2)
+    
     Args:
         id (int): REQUIRED - The MyAnimeList ID of the manga to find similar titles for
-                 (e.g., 2 for Berserk, 13 for One Piece)
+                 Example IDs: Berserk=2, One Piece=13, Naruto=11, Attack on Titan=53390,
+                             Vagabond=656, Monster=1
     
     Returns:
         List[SimilarMangaResponse]: List of recommended similar manga with
@@ -373,9 +455,22 @@ async def get_manga_news(id: int):
     This tool fetches recent news articles, announcements, and updates
     related to a specific manga title.
     
+    CRITICAL INSTRUCTIONS FOR LLM:
+    - This tool REQUIRES a numeric MAL ID
+    - NEVER use search_manga to get MAL IDs (it returns incorrect results)
+    - If you don't have the MAL ID, you MUST follow this workflow:
+      1. Use web_search with query: "{manga_name} MyAnimeList ID"
+      2. Extract the numeric ID from the search results
+      3. Then call this function with that ID
+    
+    Example Workflow:
+      User asks: "What's the latest news about Berserk?"
+      WRONG: search_manga("Berserk") then get_manga_news(result)
+      CORRECT: web_search("Berserk MyAnimeList ID") → Extract ID: 2 → get_manga_news(2)
+    
     Args:
         id (int): REQUIRED - The MyAnimeList ID of the manga to get news for
-                 (e.g., 2 for Berserk news)
+                 Example IDs: Berserk=2, One Piece=13, Naruto=11, Attack on Titan=53390
         
     Returns:
         List[MangaNewsResponse]: List of news articles with title, publication date,

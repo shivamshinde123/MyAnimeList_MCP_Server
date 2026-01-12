@@ -13,10 +13,35 @@ async def get_producer_details(params: ProducerResourceParams):
     This tool searches for anime production companies, studios, and producers
     to get information about their background and the titles they've worked on.
     
+    TOOL SELECTION PRIORITY:
+    - Use THIS tool when users ask about studios, producers, or production companies
+    - DO NOT use search_anime to find information about studios
+    - This is a specialized tool optimized for producer/studio data
+    
+    When to Use This Tool:
+      "Tell me about Studio Ghibli"
+      "What anime has Madhouse produced?"
+      "Information about Kyoto Animation"
+      "Which studios worked on [anime]?"
+      "What has Toei Animation made?"
+    
+    DO NOT use search_anime with studio names
+    
     Args:
         params (ProducerResourceParams): Search parameters including:
-            - query (str): The name of the producer/studio to search for (e.g., "Studio Ghibli", "Toei Animation", "Madhouse")
+            - query (str): The name of the producer/studio to search for
+                          Examples: "Studio Ghibli", "Toei Animation", "Madhouse", 
+                                   "Kyoto Animation", "Bones", "Ufotable", "MAPPA"
             - limit (int): Number of results to return (default: 5, max: 25)
+    
+    Common Studios to Search:
+      - Studio Ghibli (legendary films)
+      - Kyoto Animation (high-quality productions)
+      - Madhouse (diverse catalog)
+      - Bones (action anime)
+      - Ufotable (visual effects)
+      - MAPPA (recent popular titles)
+      - Toei Animation (long-running series)
         
     Returns:
         List[ProducerResourceResponse]: List of producer details with background information
