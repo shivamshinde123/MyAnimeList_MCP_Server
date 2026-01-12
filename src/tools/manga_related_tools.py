@@ -15,7 +15,9 @@ async def search_manga(params: MangaSearchParams):
     
     Args:
         params (MangaSearchParams): Search parameters including query, limit,
-                                  status, order_by, sort, start_date, and end_date
+                                  status ('airing', 'complete', 'upcoming'),
+                                  order_by ('mal_id', 'title', 'start_date', 'end_date', 'volumes', 'score', 'rank', 'popularity'),
+                                  sort ('desc', 'asc'), start_date, and end_date
     
     Returns:
         List[MangaSearchResponse]: List of manga matching search criteria with
@@ -108,7 +110,8 @@ async def get_top_manga(params: TopMangaParams):
     
     Args:
         params (TopMangaParams): Parameters for filtering top manga including
-                               filter, ratings, limit
+                               filter ('airing', 'upcoming', 'bypopularity', 'favorite'),
+                               ratings ('g', 'pg', 'pg13', 'r17', 'r', 'rx'), limit
     
     Returns:
         List[TopMangaResponse]: List of top manga with title, type, volumes,

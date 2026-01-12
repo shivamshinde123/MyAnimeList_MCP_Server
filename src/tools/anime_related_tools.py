@@ -14,7 +14,10 @@ async def search_anime(params: AnimeSearchParams):
     
     Args:
         params (AnimeSearchParams): Search parameters including query, limit,
-                                  status, rating, order_by, sort, start_date, and end_date
+                                  status ('airing', 'complete', 'upcoming'), 
+                                  rating ('g', 'pg', 'pg13', 'r17', 'r', 'rx'),
+                                  order_by ('mal_id', 'title', 'start_date', 'end_date', 'episodes', 'score', 'rank', 'popularity'),
+                                  sort ('desc', 'asc'), start_date, and end_date
     
     Returns:
         List[AnimeSearchResponse]: List of anime matching search criteria with
@@ -153,7 +156,8 @@ async def get_top_anime(params: TopAnimeParams):
     
     Args:
         params (TopAnimeParams): Parameters for filtering top anime including
-                               filter, ratings, limits
+                               filter ('airing', 'upcoming', 'bypopularity', 'favorite'),
+                               ratings ('g', 'pg', 'pg13', 'r17', 'r', 'rx'), limits
     Returns:
         List[TopAnimeResponse]: List of top anime with title, type, episodes,
                               status, rating, rank, synopsis, season, and year.
@@ -452,7 +456,7 @@ async def get_seasonal_anime(params: SeasonalAnimeParams):
     """Get anime from a specific season and year.
     
     Args:
-        params (SeasonalAnimeParams): Parameters containing year and season.
+        params (SeasonalAnimeParams): Parameters containing year and season ('fall', 'winter', 'spring', 'summer').
         
     Returns:
         List[SeasonalAnimeResponse]: List of seasonal anime with detailed
