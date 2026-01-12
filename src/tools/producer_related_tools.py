@@ -1,4 +1,3 @@
-import asyncio
 import httpx
 
 from src.utils.logger import logger

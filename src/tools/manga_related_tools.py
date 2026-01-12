@@ -1,7 +1,5 @@
-import asyncio
-import httpx
 
-from typing import Any, Dict, List, Tuple, Optional
+import httpx
 
 from src.utils.logger import logger
 from src.tools.config import mcp, BASE_URL

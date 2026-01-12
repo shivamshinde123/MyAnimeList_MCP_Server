@@ -1,5 +1,4 @@
 import logging
-import sys
 
 # configure logging 
 logger = logging.getLogger("MAL_MCPServer")
