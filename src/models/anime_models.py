@@ -1,18 +1,18 @@
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Literal, Optional, List
 
 
 class AnimeSearchParams(BaseModel):
     """Parameters for searching anime on MyAnimeList."""
-    query: Optional[str] = None
-    limit: Optional[int] = 5
-    status: Optional[Literal['airing', 'complete', 'uncoming']] = None
-    rating: Optional[Literal['g', 'pg', 'pg13', 'r17', 'r', 'rx']] = None
-    order_by: Optional[Literal['mal_id', 'title', 'start_date', 'end_date', 'episodes', 'score', 'rank', 'popularity']] = 'popularity'
-    sort: Optional[Literal['desc', 'asc']] = 'desc'
-    start_date: Optional[str] = None
-    end_date: Optional[str] = None
+    query: str = Field(..., description="Search term for anime title or keywords", min_length=1)
+    limit: Optional[int] = Field(5, description="Number of results to return", ge=1, le=25)
+    status: Optional[Literal['airing', 'complete', 'upcoming']] = Field(None, description="Filter by anime status")
+    rating: Optional[Literal['g', 'pg', 'pg13', 'r17', 'r', 'rx']] = Field(None, description="Filter by content rating")
+    order_by: Optional[Literal['mal_id', 'title', 'start_date', 'end_date', 'episodes', 'score', 'rank', 'popularity']] = Field('popularity', description="Sort results by this field")
+    sort: Optional[Literal['desc', 'asc']] = Field('desc', description="Sort direction")
+    start_date: Optional[str] = Field(None, description="Filter anime that started after this date (YYYY-MM-DD)")
+    end_date: Optional[str] = Field(None, description="Filter anime that ended before this date (YYYY-MM-DD)")
 
 class AnimeSearchResponse(BaseModel):
     """Response model for anime search results."""

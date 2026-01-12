@@ -10,14 +10,21 @@ from src.models.anime_models import (
 
 @mcp.tool()
 async def search_anime(params: AnimeSearchParams):
-    """Search for anime on MyAnimeList (MAL) based on various criteria.
+    """Search for anime on MyAnimeList based on a query string and optional filters.
+    
+    This tool searches for anime using the provided query and applies optional filters
+    like status, rating, ordering, and date ranges. The query parameter is required.
     
     Args:
-        params (AnimeSearchParams): Search parameters including query, limit,
-                                  status ('airing', 'complete', 'upcoming'), 
-                                  rating ('g', 'pg', 'pg13', 'r17', 'r', 'rx'),
-                                  order_by ('mal_id', 'title', 'start_date', 'end_date', 'episodes', 'score', 'rank', 'popularity'),
-                                  sort ('desc', 'asc'), start_date, and end_date
+        params (AnimeSearchParams): Search parameters including:
+            - query (str): REQUIRED - The search term (anime title or keywords)
+            - limit (int): Number of results to return (default: 5, max: 25)
+            - status (str): Filter by anime status - 'airing', 'complete', or 'upcoming'
+            - rating (str): Filter by content rating - 'g', 'pg', 'pg13', 'r17', 'r', 'rx'
+            - order_by (str): Sort results by - 'mal_id', 'title', 'start_date', 'end_date', 'episodes', 'score', 'rank', 'popularity'
+            - sort (str): Sort direction - 'desc' or 'asc'
+            - start_date (str): Filter anime that started after this date (YYYY-MM-DD)
+            - end_date (str): Filter anime that ended before this date (YYYY-MM-DD)
     
     Returns:
         List[AnimeSearchResponse]: List of anime matching search criteria with
@@ -152,12 +159,17 @@ async def search_anime(params: AnimeSearchParams):
 
 @mcp.tool()
 async def get_top_anime(params: TopAnimeParams):
-    """Get the top-ranked anime from MyAnimeList.
+    """Get the top-ranked anime from MyAnimeList with optional filtering.
+    
+    This tool retrieves the highest-rated anime from MyAnimeList's rankings.
+    You can filter by different categories and content ratings.
     
     Args:
-        params (TopAnimeParams): Parameters for filtering top anime including
-                               filter ('airing', 'upcoming', 'bypopularity', 'favorite'),
-                               ratings ('g', 'pg', 'pg13', 'r17', 'r', 'rx'), limits
+        params (TopAnimeParams): Filtering parameters including:
+            - filter (str): Ranking category - 'airing' (currently airing), 'upcoming' (not yet aired), 'bypopularity' (most popular), 'favorite' (most favorited)
+            - ratings (str): Content rating filter - 'g' (General), 'pg' (Parental Guidance), 'pg13' (13+), 'r17' (17+), 'r' (Restricted), 'rx' (Hentai)
+            - limit (int): Number of results to return (default: 10, max: 500)
+    
     Returns:
         List[TopAnimeResponse]: List of top anime with title, type, episodes,
                               status, rating, rank, synopsis, season, and year.
@@ -221,7 +233,10 @@ async def get_top_anime(params: TopAnimeParams):
 
 @mcp.tool()
 async def get_random_anime():
-    """Get a random anime from MyAnimeList.
+    """Get a completely random anime recommendation from MyAnimeList.
+    
+    This tool fetches a single random anime from MyAnimeList's database.
+    No parameters are needed - it returns a surprise anime recommendation.
     
     Returns:
         RandomAnimeResponse: A random anime with title, type, episodes,
@@ -281,14 +296,16 @@ async def get_random_anime():
 
 @mcp.tool()
 async def get_anime_reviews(id: int, params: AnimeReviewParams):
-    """Get reviews for a specific anime by its MyAnimeList ID.
+    """Get user reviews for a specific anime by its MyAnimeList ID.
+    
+    This tool fetches user-written reviews for a specific anime. You need the
+    anime's MAL ID (which you can get from search_anime or other tools).
     
     Args:
-        id (int): The MyAnimeList ID of the anime.
-        params (AnimeReviewParams): Parameters for filtering reviews including
-                                  spoilers and preliminary options. 
-                                  if the anime is airing/publishing, then preliminary needs to be true.
-                                  If review has spoilers, then spoilers parameter would be true.
+        id (int): REQUIRED - The MyAnimeList ID of the anime (e.g., 16498 for Attack on Titan)
+        params (AnimeReviewParams): Review filtering parameters including:
+            - preliminary (bool): Include preliminary reviews (default: True) - Set to True if anime is still airing
+            - spoilers (bool): Include reviews with spoilers (default: False) - Set to True to include spoiler reviews
     
     Returns:
         List[AnimeReviewResponse]: List of anime reviews with review text and date.
@@ -343,16 +360,18 @@ async def get_anime_reviews(id: int, params: AnimeReviewParams):
 
 @mcp.tool()
 async def get_similar_anime(id: int):
-
-    """Get recommendations for a specific anime by its MyAnimeList ID. 
-    This tool will give you anime similar to the anime whose ID you provide.
+    """Get anime recommendations similar to a specific anime by its MyAnimeList ID.
+    
+    This tool finds anime that are similar to the one you specify. Perfect for
+    discovering new anime based on something you already know or like.
     
     Args:
-        id (int): The MyAnimeList ID of the anime.
+        id (int): REQUIRED - The MyAnimeList ID of the anime to find similar titles for
+                 (e.g., 16498 for Attack on Titan, 11061 for Hunter x Hunter)
     
     Returns:
-        List[AnimeRecommendationResponse]: List of recommended anime with
-                                         MAL ID and title.
+        List[SimilarAnimeResponse]: List of recommended similar anime with
+                                   MAL ID and title for each recommendation.
     
     Raises:
         Exception: If there's an error fetching recommendations from the API.
@@ -399,14 +418,21 @@ async def get_similar_anime(id: int):
 
 @mcp.tool()
 async def get_anime_news(id: int):
-    """Get news articles for a specific anime by its MyAnimeList ID.
+    """Get the latest news articles for a specific anime by its MyAnimeList ID.
+    
+    This tool fetches recent news articles, announcements, and updates
+    related to a specific anime title.
     
     Args:
-        id (int): The MyAnimeList ID of the anime.
+        id (int): REQUIRED - The MyAnimeList ID of the anime to get news for
+                 (e.g., 16498 for Attack on Titan news)
         
     Returns:
-        List[AnimeNewsResponse]: List of news articles with title, date,
-                               author username, and excerpt.
+        List[AnimeNewsResponse]: List of news articles with title, publication date,
+                               author username, article URL, and excerpt.
+    
+    Raises:
+        Exception: If there's an error fetching news from the API.
     """
     
     try:
@@ -453,10 +479,16 @@ async def get_anime_news(id: int):
 
 @mcp.tool()
 async def get_seasonal_anime(params: SeasonalAnimeParams):
-    """Get anime from a specific season and year.
+    """Get anime from a specific season and year (seasonal anime listings).
+    
+    This tool retrieves all anime that aired or are scheduled to air during
+    a specific season of a given year. Great for discovering what was popular
+    in a particular time period.
     
     Args:
-        params (SeasonalAnimeParams): Parameters containing year and season ('fall', 'winter', 'spring', 'summer').
+        params (SeasonalAnimeParams): Season and year parameters including:
+            - season (str): The season - 'spring' (Apr-Jun), 'summer' (Jul-Sep), 'fall' (Oct-Dec), 'winter' (Jan-Mar)
+            - year (int): The year (e.g., 2024, 2023, 2025) - defaults to 2025
         
     Returns:
         List[SeasonalAnimeResponse]: List of seasonal anime with detailed
@@ -464,6 +496,9 @@ async def get_seasonal_anime(params: SeasonalAnimeParams):
                                 rating, score, scored_by, rank, popularity, favorites, synopsis, background,
                                 season, year, producer_ids list, producer_names list, studio_ids list, studio_names list,
                                 genre_ids list, genre_names list
+    
+    Raises:
+        Exception: If there's an error fetching seasonal anime from the API.
     """
 
     try:

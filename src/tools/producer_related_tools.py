@@ -8,13 +8,22 @@ from src.models.producer_models import ProducerResourceParams, ProducerResourceR
 
 @mcp.tool()
 async def get_producer_details(params: ProducerResourceParams):
-    """Get details about anime producers.
+    """Get detailed information about anime producers and studios.
+    
+    This tool searches for anime production companies, studios, and producers
+    to get information about their background and the titles they've worked on.
     
     Args:
-        params: ProducerResourceParams containing query and limit parameters
+        params (ProducerResourceParams): Search parameters including:
+            - query (str): The name of the producer/studio to search for (e.g., "Studio Ghibli", "Toei Animation", "Madhouse")
+            - limit (int): Number of results to return (default: 5, max: 25)
         
     Returns:
-        ProducerResourceResponse with producer about text and titles
+        List[ProducerResourceResponse]: List of producer details with background information
+                                      and list of titles they've produced
+    
+    Raises:
+        Exception: If there's an error fetching producer data from the API.
     """
 
     try:

@@ -1,17 +1,17 @@
 
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Literal, Optional, List
 
 class MangaSearchParams(BaseModel):
     """Parameters for searching manga on MyAnimeList."""
-    query: Optional[str] = None
-    limit: Optional[int] = 5
-    status: Optional[Literal['airing', 'complete', 'uncoming']] = 'complete'
-    order_by: Optional[Literal['mal_id', 'title', 'start_date', 'end_date', 'volumes', 'score', 'rank', 'popularity']] = 'popularity'
-    sort: Optional[Literal['desc', 'asc']] = 'desc'
-    start_date: Optional[str] = None
-    end_date: Optional[str] = None
+    query: str = Field(..., description="Search term for manga title or keywords", min_length=1)
+    limit: Optional[int] = Field(5, description="Number of results to return", ge=1, le=25)
+    status: Optional[Literal['airing', 'complete', 'upcoming']] = Field(None, description="Filter by manga status - 'airing' (currently publishing), 'complete' (finished), 'upcoming' (not yet published)")
+    order_by: Optional[Literal['mal_id', 'title', 'start_date', 'end_date', 'volumes', 'score', 'rank', 'popularity']] = Field('popularity', description="Sort results by this field")
+    sort: Optional[Literal['desc', 'asc']] = Field('desc', description="Sort direction")
+    start_date: Optional[str] = Field(None, description="Filter manga that started after this date (YYYY-MM-DD)")
+    end_date: Optional[str] = Field(None, description="Filter manga that ended before this date (YYYY-MM-DD)")
 
 class MangaSearchResponse(BaseModel):
     """Response model for manga search results."""
@@ -36,9 +36,9 @@ class MangaSearchResponse(BaseModel):
 
 class TopMangaParams(BaseModel):
     """Parameters for filtering top manga requests."""
-    filter: Optional[Literal['airing', 'upcoming', 'bypopularity', 'favorite']] = 'airing'
-    ratings: Optional[Literal['g', 'pg', 'pg13', 'r17', 'r', 'rx']] = 'g'
-    limit: Optional[int] = 10
+    filter: Optional[Literal['airing', 'upcoming', 'bypopularity', 'favorite']] = Field('airing', description="Ranking category - 'airing' (currently publishing), 'upcoming' (not yet published), 'bypopularity' (most popular), 'favorite' (most favorited)")
+    ratings: Optional[Literal['g', 'pg', 'pg13', 'r17', 'r', 'rx']] = Field('g', description="Content rating filter")
+    limit: Optional[int] = Field(10, description="Number of results to return", ge=1, le=500)
 
 class TopMangaResponse(BaseModel):
     """Response model for top manga data."""
@@ -64,8 +64,8 @@ class RandomMangaResponse(BaseModel):
 
 class MangaReviewParams(BaseModel):
     """Parameters for filtering manga review requests."""
-    preliminary: Optional[bool] = True # if the manga is airing/publishing, then preliminary needs to be true
-    spoilers: Optional[bool] = False
+    preliminary: Optional[bool] = Field(True, description="Include preliminary reviews - set to True if manga is still publishing")
+    spoilers: Optional[bool] = Field(False, description="Include reviews with spoilers - set to True to include spoiler reviews")
 
 class MangaReviewResponse(BaseModel):
     """Response model for manga review data."""

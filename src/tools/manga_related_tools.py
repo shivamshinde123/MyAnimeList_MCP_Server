@@ -10,14 +10,20 @@ from src.models.manga_models import (
 
 @mcp.tool()
 async def search_manga(params: MangaSearchParams):
-
-    """Search for manga on MyAnimeList based on various criteria.
+    """Search for manga on MyAnimeList based on a query string and optional filters.
+    
+    This tool searches for manga using the provided query and applies optional filters
+    like status, ordering, and date ranges. The query parameter is required.
     
     Args:
-        params (MangaSearchParams): Search parameters including query, limit,
-                                  status ('airing', 'complete', 'upcoming'),
-                                  order_by ('mal_id', 'title', 'start_date', 'end_date', 'volumes', 'score', 'rank', 'popularity'),
-                                  sort ('desc', 'asc'), start_date, and end_date
+        params (MangaSearchParams): Search parameters including:
+            - query (str): REQUIRED - The search term (manga title or keywords)
+            - limit (int): Number of results to return (default: 5, max: 25)
+            - status (str): Filter by manga status - 'airing' (currently publishing), 'complete' (finished), 'upcoming' (not yet published)
+            - order_by (str): Sort results by - 'mal_id', 'title', 'start_date', 'end_date', 'volumes', 'score', 'rank', 'popularity'
+            - sort (str): Sort direction - 'desc' or 'asc'
+            - start_date (str): Filter manga that started after this date (YYYY-MM-DD)
+            - end_date (str): Filter manga that ended before this date (YYYY-MM-DD)
     
     Returns:
         List[MangaSearchResponse]: List of manga matching search criteria with
@@ -106,12 +112,16 @@ async def search_manga(params: MangaSearchParams):
 
 @mcp.tool()
 async def get_top_manga(params: TopMangaParams):
-    """Get the top-ranked manga from MyAnimeList.
+    """Get the top-ranked manga from MyAnimeList with optional filtering.
+    
+    This tool retrieves the highest-rated manga from MyAnimeList's rankings.
+    You can filter by different categories and content ratings.
     
     Args:
-        params (TopMangaParams): Parameters for filtering top manga including
-                               filter ('airing', 'upcoming', 'bypopularity', 'favorite'),
-                               ratings ('g', 'pg', 'pg13', 'r17', 'r', 'rx'), limit
+        params (TopMangaParams): Filtering parameters including:
+            - filter (str): Ranking category - 'airing' (currently publishing), 'upcoming' (not yet published), 'bypopularity' (most popular), 'favorite' (most favorited)
+            - ratings (str): Content rating filter - 'g' (General), 'pg' (Parental Guidance), 'pg13' (13+), 'r17' (17+), 'r' (Restricted), 'rx' (Hentai)
+            - limit (int): Number of results to return (default: 10, max: 500)
     
     Returns:
         List[TopMangaResponse]: List of top manga with title, type, volumes,
@@ -174,7 +184,10 @@ async def get_top_manga(params: TopMangaParams):
 
 @mcp.tool()
 async def get_random_manga():
-    """Get a random manga from MyAnimeList.
+    """Get a completely random manga recommendation from MyAnimeList.
+    
+    This tool fetches a single random manga from MyAnimeList's database.
+    No parameters are needed - it returns a surprise manga recommendation.
     
     Returns:
         RandomMangaResponse: A random manga with title, type, volumes,
@@ -233,15 +246,16 @@ async def get_random_manga():
 
 @mcp.tool()
 async def get_manga_reviews(id: int, params: MangaReviewParams):
-
-    """Get reviews for a specific manga by its MyAnimeList ID.
+    """Get user reviews for a specific manga by its MyAnimeList ID.
+    
+    This tool fetches user-written reviews for a specific manga. You need the
+    manga's MAL ID (which you can get from search_manga or other tools).
     
     Args:
-        id (int): The MyAnimeList ID of the manga.
-        params (MangaReviewParams): Parameters for filtering reviews including
-                                  spoilers and preliminary options.
-                                  if the manga is airing/publishing, then preliminary needs to be true.
-                                  If review has spoilers, then spoilers parameter would be true.
+        id (int): REQUIRED - The MyAnimeList ID of the manga (e.g., 2 for Berserk)
+        params (MangaReviewParams): Review filtering parameters including:
+            - preliminary (bool): Include preliminary reviews (default: True) - Set to True if manga is still publishing
+            - spoilers (bool): Include reviews with spoilers (default: False) - Set to True to include spoiler reviews
     
     Returns:
         List[MangaReviewResponse]: List of manga reviews with review text and date.
@@ -296,15 +310,18 @@ async def get_manga_reviews(id: int, params: MangaReviewParams):
 
 @mcp.tool()
 async def get_similar_manga(id: int):
-    """Get recommendations for a specific manga by its MyAnimeList ID. 
-    This tool will give you manga similar to the manga whose ID you provide.
+    """Get manga recommendations similar to a specific manga by its MyAnimeList ID.
+    
+    This tool finds manga that are similar to the one you specify. Perfect for
+    discovering new manga based on something you already know or like.
     
     Args:
-        id (int): The MyAnimeList ID of the manga.
+        id (int): REQUIRED - The MyAnimeList ID of the manga to find similar titles for
+                 (e.g., 2 for Berserk, 13 for One Piece)
     
     Returns:
-        List[MangaRecommendationResponse]: List of recommended manga with
-                                         MAL ID and title.
+        List[SimilarMangaResponse]: List of recommended similar manga with
+                                   MAL ID and title for each recommendation.
     
     Raises:
         Exception: If there's an error fetching recommendations from the API.
@@ -351,14 +368,21 @@ async def get_similar_manga(id: int):
 
 @mcp.tool()
 async def get_manga_news(id: int):
-    """Get news articles for a specific manga by its MyAnimeList ID.
+    """Get the latest news articles for a specific manga by its MyAnimeList ID.
+    
+    This tool fetches recent news articles, announcements, and updates
+    related to a specific manga title.
     
     Args:
-        id (int): The MyAnimeList ID of the manga.
+        id (int): REQUIRED - The MyAnimeList ID of the manga to get news for
+                 (e.g., 2 for Berserk news)
         
     Returns:
-        List[MangaNewsResponse]: List of news articles with title, date,
-                               author username, and excerpt.
+        List[MangaNewsResponse]: List of news articles with title, publication date,
+                               author username, article URL, and excerpt.
+    
+    Raises:
+        Exception: If there's an error fetching news from the API.
     """
     
     try:
