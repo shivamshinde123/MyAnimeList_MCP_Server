@@ -1,7 +1,7 @@
 # MyAnimeList MCP Server
 
 <p align="center">
-  <img src="readme_img.jpg" width="600" alt="MyAnimeList MCP Server Banner">
+  <img src="images/readme_img.jpg" width="600" alt="MyAnimeList MCP Server Banner">
 </p>
 
 A Model Context Protocol (MCP) server that provides comprehensive access to MyAnimeList data through the Jikan API. This server enables AI assistants to search, retrieve, and analyze anime and manga information.
@@ -70,18 +70,28 @@ Add this server to your MCP client configuration:
 ```json
 {
   "mcpServers": {
-    "myanimelist": {
-      "command": "uv",
+    "myanimelist-server": {
+      "command": "/path/to/your/MyAnimeList_MCP_Server/.venv/Scripts/python.exe",
       "args": [
-        "--directory",
-        "path/to/MyAnimeList_MCP_Server",
-        "run",
-        "main.py"
-      ]
+        "/path/to/your/MyAnimeList_MCP_Server/main.py"
+      ],
+      "cwd": "/path/to/your/MyAnimeList_MCP_Server",
+      "env": {
+        "PYTHONPATH": "/path/to/your/MyAnimeList_MCP_Server"
+      }
     }
   }
 }
 ```
+
+Replace `/path/to/your/MyAnimeList_MCP_Server` with the actual absolute path to your project folder.
+
+### Important Notes for Windows Users:
+* **Double Backslashes:** If you are on Windows, then you must use double backslashes (`\\`) in the JSON file to avoid escape character errors (e.g., `C:\\Users\\Name\\Project\\...`).
+* **Absolute Paths:** MCP hosts (like Claude Desktop) generally require **absolute paths** rather than relative paths (like `./.venv/...`) to function correctly.
+
+### Why use the .venv path? 
+Using the python.exe inside the .venv folder automatically activates the virtual environment for the server. This allows the server to access all the packages installed specifically for this project.
 
 ## Available Tools
 
@@ -103,6 +113,25 @@ Add this server to your MCP client configuration:
 - `get_manga_reviews(id, params)` - Get reviews for specific manga
 - `get_similar_manga(id)` - Get manga recommendations
 - `get_manga_news(id)` - Get news for specific manga
+
+## Examples
+### Seasonal Anime Search 
+
+<p align="center">
+  <img src="images/Seasonal_Anime.png" width="700" alt="Claude searching for anime">
+</p>
+
+### Similar Anime Recommendation
+
+<p align="center">
+  <img src="images/Similar_Anime.png" width="700" alt="Claude searching for anime">
+</p>
+
+### Anime News
+
+<p align="center">
+  <img src="images/Anime_News.png" width="700" alt="Claude searching for anime">
+</p>
 
 ## Project Structure
 
