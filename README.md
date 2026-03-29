@@ -6,6 +6,10 @@
 
 A Model Context Protocol (MCP) server that provides comprehensive access to MyAnimeList data through the Jikan API. This server enables AI assistants to search, retrieve, and analyze anime and manga information.
 
+## Detailed Documentation
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/shivamshinde123/MyAnimeList_MCP_Server)
+
 ## Features
 
 ### Anime Tools
