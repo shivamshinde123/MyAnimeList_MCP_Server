@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MyAnimeList MCP Server — anime and manga, inside your AI assistant</title>
+<meta name="description" content="A Model Context Protocol server with 15 tools that give Claude and other AI assistants search, rankings, seasons, reviews, recommendations and news from MyAnimeList via the Jikan API.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<style>
+/* Design reference: Letterboxd via Refero Styles — a darkened cinema lobby with a neon rating glow.
+   Blue-tinted dark stack (#14181c → #202830 → #2c3440), cool gray text, acid green only for the primary action
+   and ratings, 3px radii, tracked uppercase chrome, a literary serif for editorial moments. */
+:root{--void:#14181c;--carbon:#202830;--slate:#2c3440;--graphite:#445566;--steel:#586370;--fog:#667788;--silver:#778899;--ash:#8899aa;
+  --pewter:#99aabb;--ice:#aabbcc;--glacier:#ddeeff;--bone:#d8e0e8;--white:#fff;--green:#00e054;--orange:#ff8000;--blue:#40bcf4;
+  --serif:"Source Serif 4",Georgia,serif;--sans:Inter,system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace}
+*{box-sizing:border-box;margin:0}
+html{color-scheme:dark}
+body{background:var(--void);color:var(--pewter);font:400 15px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--ice);text-decoration:none}a:hover{color:var(--white)}
+:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+.label{font:400 12px var(--sans);text-transform:uppercase;letter-spacing:.08em;color:var(--silver)}
+h1,h2{font-family:var(--serif);font-weight:700;color:var(--white)}
+
+nav.top{background:var(--carbon)}
+nav.top .wrap{height:68px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px;color:var(--white);font:700 17px var(--sans)}
+.dots{display:flex}
+.dots i{width:14px;height:14px;border-radius:50%;margin-right:-4px;mix-blend-mode:screen}
+nav.top ul{display:flex;gap:24px;list-style:none;padding:0}
+nav.top ul a{font:700 12px var(--sans);text-transform:uppercase;letter-spacing:.08em;color:var(--ice)}
+.btn{display:inline-flex;align-items:center;height:40px;padding:0 18px;border-radius:3px;font:700 13px var(--sans);text-transform:uppercase;letter-spacing:.075em}
+.btn.go{background:var(--green);color:#0b2414}.btn.go:hover{color:#000;filter:brightness(1.08)}
+.btn.alt{background:var(--slate);color:var(--bone)}.btn.alt:hover{background:var(--graphite);color:var(--white)}
+
+header.hero{padding:88px 0 64px;border-bottom:1px solid var(--slate)}
+.hero .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:56px;align-items:center}
+h1{font-size:clamp(40px,5.6vw,64px);line-height:1.08;letter-spacing:-.01em;margin:18px 0 20px}
+.lede{font:400 18px/1.67 var(--serif);color:var(--ice);max-width:540px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:30px}
+.chat{background:var(--carbon);border-radius:3px;overflow:hidden;box-shadow:0 0 0 1px var(--slate)}
+.chat img{display:block;width:100%;height:auto}
+
+.stats{display:flex;gap:40px;flex-wrap:wrap;margin-top:40px}
+.stats div b{display:block;font:700 28px var(--sans);color:var(--white)}
+
+section{padding:80px 0}
+h2{font-size:clamp(28px,3.6vw,40px);line-height:1.15;margin:12px 0 14px;max-width:22ch}
+.sub{font:400 17px/1.67 var(--serif);color:var(--ice);max-width:620px}
+
+/* tool list, styled like a diary */
+.shelves{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:40px}
+.shelf h3{display:flex;justify-content:space-between;font:700 13px var(--sans);text-transform:uppercase;letter-spacing:.08em;color:var(--ice);border-bottom:1px solid var(--slate);padding-bottom:10px}
+.shelf h3 span{color:var(--fog)}
+.tool{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:14px 0;border-bottom:1px solid var(--carbon)}
+.tool code{font:400 13px var(--mono);color:var(--glacier)}
+.tool p{font-size:14px;color:var(--fog);margin-top:2px}
+.stars{color:var(--green);font-size:13px;letter-spacing:2px;white-space:nowrap}
+
+/* screenshots as posters */
+.posters{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px}
+.poster{background:var(--carbon);border-radius:3px;overflow:hidden;box-shadow:0 0 0 1px var(--slate);transition:box-shadow .15s}
+.poster:hover{box-shadow:0 0 0 2px var(--green)}
+.poster img{display:block;width:100%;aspect-ratio:4/3.3;object-fit:cover;object-position:top}
+.poster figcaption{padding:12px 14px}
+.poster figcaption b{display:block;color:var(--white);font:700 14px var(--sans)}
+.poster figcaption span{font:400 12px var(--mono);color:var(--fog)}
+
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}
+.filters span{font:400 12px var(--mono);color:var(--bone);background:var(--carbon);padding:6px 10px;border-radius:3px}
+.filters span b{color:var(--fog);font-weight:400}
+
+.setup{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;margin-top:40px}
+pre{background:var(--carbon);border-radius:3px;padding:20px;font:400 13px/1.75 var(--mono);color:var(--bone);overflow-x:auto;box-shadow:0 0 0 1px var(--slate)}
+pre .c{color:var(--fog)}pre .s{color:var(--green)}
+.note{margin-top:14px;padding:14px 16px;background:var(--carbon);border-left:3px solid var(--orange);border-radius:3px;font-size:14px}
+
+footer{background:var(--carbon);padding:28px 0;font-size:13px;color:var(--fog)}
+footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+@media(max-width:900px){.hero .grid,.shelves,.setup{grid-template-columns:1fr}.posters{grid-template-columns:1fr 1fr}nav.top ul li:not(:last-child){display:none}}
+@media(max-width:560px){.posters{grid-template-columns:1fr}section{padding:64px 0}}
+</style>
+</head>
+<body>
+<nav class="top" aria-label="Primary"><div class="wrap">
+  <a class="logo" href="#"><span class="dots" aria-hidden="true"><i style="background:#ff8000"></i><i style="background:#00e054"></i><i style="background:#40bcf4"></i></span>&nbsp;MyAnimeList MCP</a>
+  <ul><li><a href="#tools">Tools</a></li><li><a href="#inaction">In action</a></li><li><a href="#setup">Setup</a></li><li><a href="https://github.com/shivamshinde123/MyAnimeList_MCP_Server">GitHub</a></li></ul>
+</div></nav>
+
+<main>
+<header class="hero"><div class="wrap grid">
+  <div>
+    <span class="label">Model Context Protocol · Jikan API</span>
+    <h1>Your anime watchlist, now inside your AI assistant.</h1>
+    <p class="lede">An MCP server that lets Claude and other assistants search MyAnimeList, pull top charts and whole seasons, read reviews and news, and recommend what to watch or read next. With real data, not memory.</p>
+    <div class="row"><a class="btn go" href="#setup">Connect it</a><a class="btn alt" href="https://github.com/shivamshinde123/MyAnimeList_MCP_Server">Source</a></div>
+    <div class="stats"><div><b>15</b><span class="label">tools</span></div><div><b>3</b><span class="label">domains</span></div><div><b>0</b><span class="label">API keys</span></div></div>
+  </div>
+  <figure class="chat"><img src="https://raw.githubusercontent.com/shivamshinde123/MyAnimeList_MCP_Server/master/images/Seasonal_Anime.png" alt="Claude calling get_seasonal_anime with year 2022 and season spring, then listing that season's popular series with scores" width="847" height="769"></figure>
+</div></header>
+
+<section id="tools"><div class="wrap">
+  <span class="label">The catalog</span>
+  <h2>Fifteen tools, filed by shelf.</h2>
+  <p class="sub">Every tool takes typed, validated parameters (Pydantic models) and returns clean fields like score, rank, episodes, studios and genres.</p>
+  <div class="shelves">
+    <div class="shelf">
+      <h3>Anime <span>7 tools</span></h3>
+      <div class="tool"><div><code>search_anime</code><p>Title or keyword, with filters and sorting</p></div><span class="stars" aria-hidden="true">★★★★★</span></div>
+      <div class="tool"><div><code>get_top_anime</code><p>Airing, upcoming, by popularity, or favorites</p></div><span class="stars" aria-hidden="true">★★★★½</span></div>
+      <div class="tool"><div><code>get_seasonal_anime</code><p>Everything from a given season and year</p></div><span class="stars" aria-hidden="true">★★★★½</span></div>
+      <div class="tool"><div><code>get_similar_anime</code><p>Recommendations based on one title</p></div><span class="stars" aria-hidden="true">★★★★</span></div>
+      <div class="tool"><div><code>get_anime_reviews</code><p>What users actually wrote</p></div><span class="stars" aria-hidden="true">★★★★</span></div>
+      <div class="tool"><div><code>get_anime_news</code><p>Latest articles for a title</p></div><span class="stars" aria-hidden="true">★★★½</span></div>
+      <div class="tool"><div><code>get_random_anime</code><p>For when you can't decide</p></div><span class="stars" aria-hidden="true">★★★½</span></div>
+    </div>
+    <div class="shelf">
+      <h3>Manga <span>7 tools</span></h3>
+      <div class="tool"><div><code>search_manga</code><p>Title or keyword, with status and date filters</p></div><span class="stars" aria-hidden="true">★★★★★</span></div>
+      <div class="tool"><div><code>get_top_manga</code><p>The highest ranked manga</p></div><span class="stars" aria-hidden="true">★★★★½</span></div>
+      <div class="tool"><div><code>get_similar_manga</code><p>Recommendations based on one title</p></div><span class="stars" aria-hidden="true">★★★★</span></div>
+      <div class="tool"><div><code>get_manga_reviews</code><p>User reviews for a title</p></div><span class="stars" aria-hidden="true">★★★★</span></div>
+      <div class="tool"><div><code>get_manga_news</code><p>Latest articles for a title</p></div><span class="stars" aria-hidden="true">★★★½</span></div>
+      <div class="tool"><div><code>get_random_manga</code><p>A surprise pick</p></div><span class="stars" aria-hidden="true">★★★½</span></div>
+      <h3 style="margin-top:28px">Producers <span>1 tool</span></h3>
+      <div class="tool"><div><code>get_producer_details</code><p>Studios and producers behind a show</p></div><span class="stars" aria-hidden="true">★★★★</span></div>
+    </div>
+  </div>
+  <div class="filters" aria-label="search_anime parameters">
+    <span><b>status</b> airing · complete · upcoming</span><span><b>rating</b> g · pg · pg13 · r17 · r · rx</span><span><b>order_by</b> score · rank · popularity · episodes</span><span><b>sort</b> desc · asc</span><span><b>start_date / end_date</b> YYYY-MM-DD</span><span><b>limit</b> 1–25</span>
+  </div>
+</div></section>
+
+<section id="inaction" style="background:#101317"><div class="wrap">
+  <span class="label">Now showing</span>
+  <h2>Ask like you'd ask a friend who's seen everything.</h2>
+  <div class="posters" style="grid-template-columns:1.2fr 1fr">
+    <figure class="poster"><img src="https://raw.githubusercontent.com/shivamshinde123/MyAnimeList_MCP_Server/master/images/Similar_Anime.png" alt="Claude finding anime similar to Cowboy Bebop via get_similar_anime and explaining each recommendation" loading="lazy" style="aspect-ratio:auto"><figcaption><b>"Give me anime similar to Cowboy Bebop"</b><span>get_similar_anime → 8 results</span></figcaption></figure>
+    <figure class="poster" style="display:flex;flex-direction:column">
+<pre style="box-shadow:none;border-radius:0;flex:1;margin:0"><span class="c">// "What are the top airing shows right now?"</span>
+get_top_anime({
+  "filter": <span class="s">"airing"</span>,
+  "limit": 5
+})
+
+<span class="c">// each result comes back as clean fields</span>
+{
+  "title": "…",
+  "type": "TV",
+  "episodes": 24,
+  "status": "Currently Airing",
+  "rating": "PG-13",
+  "rank": 3,
+  "season": "fall",
+  "year": 2026,
+  "synopsis": "…"
+}</pre>
+      <figcaption><b>"What's top airing right now?"</b><span>get_top_anime · response shape</span></figcaption>
+    </figure>
+  </div>
+</div></section>
+
+<section id="setup"><div class="wrap">
+  <span class="label">Setup · Python 3.10+, uv</span>
+  <h2>Three steps to your client.</h2>
+  <div class="setup">
+<pre><span class="c"># 1. install</span>
+git clone https://github.com/shivamshinde123/MyAnimeList_MCP_Server.git
+cd MyAnimeList_MCP_Server
+uv sync
+cp .env.example .env   <span class="c"># Jikan BASE_URL is preset</span>
+
+<span class="c"># 2. try it in the MCP inspector</span>
+npx @modelcontextprotocol/inspector uv run main.py</pre>
+    <div>
+<pre><span class="c">// 3. add to your MCP client config</span>
+{
+  "mcpServers": {
+    <span class="s">"myanimelist-server"</span>: {
+      "command": "/path/to/.venv/Scripts/python.exe",
+      "args": ["/path/to/main.py"],
+      "cwd": "/path/to/MyAnimeList_MCP_Server"
+    }
+  }
+}</pre>
+      <p class="note">On Windows, use absolute paths with double backslashes in the JSON. Pointing at the <code style="font-family:var(--mono)">.venv</code> Python activates the environment automatically.</p>
+    </div>
+  </div>
+</div></section>
+</main>
+
+<footer><div class="wrap"><span>Built by <a href="https://github.com/shivamshinde123">Shivam Shinde</a></span><span>Data from MyAnimeList via the unofficial Jikan API. Not affiliated with MyAnimeList.</span></div></footer>
+</body>
+</html>
